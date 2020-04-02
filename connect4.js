@@ -58,11 +58,64 @@ class Connect4{
         //onClick CSS Styling Function
         $board.on('click', '.col.empty', function(){
             const col = $(this).data('col');
+            const row = $(this).data('row');
             const $lastEmptyCell = findLastEmptyCell(col);
             $lastEmptyCell.removeClass(`empty next-${that.player}`);
             $lastEmptyCell.addClass(that.player);
-            that.player = (that.player === 'red') ? 'black' : 'red';
+            $lastEmptyCell.data('player', that.player)
+
+            const winner = that.checkForWinner(row, col)
+            if(winner){
+                alert(`Game Over! Player ${that.player} has won!`);
+                return;
+            }
+
+            that.player= (that.player === 'red') ? 'black' : 'red';
             $(this).trigger('mouseenter');
-        });
-    }
+            });
+        }   
+
+        //CheckWinner Function
+        checkForWinner(row, col){
+        const that = this; 
+
+        function $getCell(i, j){
+           return $(`.col[data-row ='${i}'][data-col ='${j}']`);
+        } 
+
+        function checkDirection(direction){
+            let total = 0;
+            let i = row + direction.i;
+            let j = col + direction.j;
+            let $next = $getCell(i, j);
+            while(i >= 0 &&
+                i < that.ROWS &&
+                j >= 0 &&
+                j < that.COLS &&
+                $next.data('player') === that.player){
+                    total++;
+                    i += direction.i;
+                    j += direction.j;
+                    $next = $getCell(i, j);
+                }
+            return total;    
+        }
+
+        function checkWin(directionA, directionB){
+            const total = 1 +
+                checkDirection(directionA) +
+                checkDirection(directionB);
+             if (total >= 4){
+                 return that.player;
+             } else {
+                 return null;
+             }
+        }
+
+        function checkVerticals(){
+            return checkWin({i: -1, j: 0}, {i: 1, j:0});
+        }
+
+        return checkVerticals();
+        }   
 } 
